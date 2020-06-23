@@ -12,6 +12,8 @@ import kinova_msgs.msg
 import std_msgs.msg
 import geometry_msgs.msg
 
+import serial
+import time
 
 import math
 import argparse
@@ -23,6 +25,11 @@ prefix = 'NO_ROBOT_TYPE_DEFINED_'
 finger_maxDist = 18.9/2/1000  # max distance for one finger
 finger_maxTurn = 6800  # max thread rotation for one finger
 currentCartesianCommand = [0.212322831154, -0.257197618484, 0.509646713734, 1.63771402836, 1.11316478252, 0.134094119072] # default home in unit mq
+
+# sending material control
+# serialPort = "COM4"
+# baudRate = 9000
+# ser = serial.Serial(serialPort, baudRate, timeout = 0.5)
 
 
 def cartesian_pose_client(position, orientation):
@@ -38,7 +45,7 @@ def cartesian_pose_client(position, orientation):
     goal.pose.pose.orientation = geometry_msgs.msg.Quaternion(
         x=orientation[0], y=orientation[1], z=orientation[2], w=orientation[3])
 
-    print('goal.pose in client 1: {}'.format(goal.pose.pose)) # debug
+    # print('goal.pose in client 1: {}'.format(goal.pose.pose)) # debug
 
     client.send_goal(goal)
 
@@ -214,17 +221,17 @@ def verboseParser(verbose, pose_mq_):
     if verbose:
         orientation_rad = Quaternion2EulerXYZ(orientation_q)
         orientation_deg = list(map(math.degrees, orientation_rad))
-        print('Cartesian position is: {}'.format(position_))
-        print('Cartesian orientation in Quaternion is: ')
-        print('qx {:0.3f}, qy {:0.3f}, qz {:0.3f}, qw {:0.3f}'.format(orientation_q[0], orientation_q[1], orientation_q[2], orientation_q[3]))
-        print('Cartesian orientation in Euler-XYZ(radian) is: ')
-        print('tx {:0.3f}, ty {:0.3f}, tz {:0.3f}'.format(orientation_rad[0], orientation_rad[1], orientation_rad[2]))
-        print('Cartesian orientation in Euler-XYZ(degree) is: ')
-        print('tx {:3.1f}, ty {:3.1f}, tz {:3.1f}'.format(orientation_deg[0], orientation_deg[1], orientation_deg[2]))
+        # print('Cartesian position is: {}'.format(position_))
+        # print('Cartesian orientation in Quaternion is: ')
+        # print('qx {:0.3f}, qy {:0.3f}, qz {:0.3f}, qw {:0.3f}'.format(orientation_q[0], orientation_q[1], orientation_q[2], orientation_q[3]))
+        # print('Cartesian orientation in Euler-XYZ(radian) is: ')
+        # print('tx {:0.3f}, ty {:0.3f}, tz {:0.3f}'.format(orientation_rad[0], orientation_rad[1], orientation_rad[2]))
+        # print('Cartesian orientation in Euler-XYZ(degree) is: ')
+        # print('tx {:3.1f}, ty {:3.1f}, tz {:3.1f}'.format(orientation_deg[0], orientation_deg[1], orientation_deg[2]))
 
 
 def gcodeParser():
-    f = open('UMS5_50_50_100.gcode')
+    f = open('obj2.gcode')
     x = 0
     y = 0
     z = 0
@@ -282,7 +289,7 @@ if __name__ == '__main__':
     a = gcodeParser()
     print a[0:10]
     temp = -0.1
-    test = [[temp, temp, 0, 0, 0, 70]]
+    test = [[temp, temp, 0, 0, 0, 70], [-0.2, -0.35, -0.40, 0, 0, 0]]
     
 
     for i in test:
@@ -300,6 +307,7 @@ if __name__ == '__main__':
         except rospy.ROSInterruptException:
             print "program interrupted before completion"
 
+    # ser.write(b"r")
     for i in a:
 
         pose_mq, pose_mdeg, pose_mrad = unitParser('mdeg', i, True)
@@ -314,6 +322,8 @@ if __name__ == '__main__':
 
         except rospy.ROSInterruptException:
             print "program interrupted before completion"
+
+    # ser.write(b"s")
 
 
     
